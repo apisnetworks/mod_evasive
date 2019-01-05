@@ -145,6 +145,7 @@ cd mod_evasive
 sh build.sh
 rpm -Uhv RPMS/x86_64/*.rpm
 systemctl restart httpd
+```
 
 #### CONFIGURATION APACHE v2.x
 
