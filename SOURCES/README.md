@@ -187,6 +187,12 @@ evasive can be used configured per-directory, per-virtualhost, and per-location
 <Location /images/emoji>
 	DOSEnabled off
 </Location>
+
+# Alternatively disable mod_evasive for all static files
+<FilesMatch "\.(?:png|jpg|svg|js|css)$">
+	DOSEnabled off
+</FilesMatch>
+
 ```
 
 ### mod_evasive Directives
