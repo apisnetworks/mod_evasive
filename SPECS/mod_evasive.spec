@@ -14,7 +14,7 @@
 
 Name:		mod_evasive
 Version:	2.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	Realtime blacklist module for Apache 2
 Group:		System Environment/Daemons
 License:	GPL 2.0
@@ -63,6 +63,9 @@ rm -rf %{buildroot}
 %{_httpd_moddir}/*.so
 
 %changelog
+* Thu Aug 29 2019 Matt Saladna <matt@apisnetworks.com> - 2.1-3
+- Change default HTTP status to 429 
+
 * Sun Jan 13 2019 Matt Saladna <matt@apisnetworks.com> - 2.1-2
 - Bump baseline site count to 300/4 seconds
 
