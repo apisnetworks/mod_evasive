@@ -100,6 +100,38 @@ static struct ntt_node *c_ntt_next(struct ntt *ntt, struct ntt_c *c);
 
 /* END NTT (Named Timestamp Tree) Headers */
 
+/* Adopted from apr */
+inline char * strtok_evasive(char *str, const char *sep, char **last)
+{
+	char *token;
+
+	if (!str)           /* subsequent call */
+		str = *last;      /* start where we left off */
+
+	/* skip characters in sep (will terminate at '\0') */
+	while (*str && strchr(sep, *str))
+		++str;
+
+	if (!*str)          /* no more tokens */
+		return NULL;
+
+	token = str;
+
+	/* skip valid token characters to terminate token and
+	 * prepare for the next call (will terminate at '\0)
+	 */
+	*last = token + 1;
+	while (**last && !strchr(sep, **last))
+		++*last;
+
+	if (**last) {
+		**last = '\0';
+		++*last;
+	}
+
+	return token;
+}
+
 
 /* BEGIN DoS Evasive Maneuvers Globals */
 
@@ -170,7 +202,7 @@ static int access_checker(request_rec *r)
 
 	/* BEGIN DoS Evasive Maneuvers Code */
 	if (cfg->enabled && r->prev == NULL && r->main == NULL && hit_list != NULL) {
-		char hash_key[2048];
+		char hash_key[2048], *last = NULL;
 		struct ntt_node *n;
 		time_t t = time(NULL);
 
@@ -191,7 +223,7 @@ static int access_checker(request_rec *r)
 		} else {
 
 			/* Has URI been hit too much? */
-			snprintf(hash_key, 2048, "%s_%s", r->useragent_ip, r->uri);
+			snprintf(hash_key, 2048, "%s_%s", r->useragent_ip, strtok_evasive(r->uri, "?", &last));
 			n = ntt_find(hit_list, hash_key);
 			if (n != NULL) {
 

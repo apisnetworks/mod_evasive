@@ -30,10 +30,6 @@ legitimate requests are rarely ever compromised, only legitimate attacks.  Even
 a user repeatedly clicking on 'reload' should not be affected unless they do
 it maliciously.
 
-One module is provided in this forked version:
-
-Apache v2.x API:	mod_evasive.c
-
 ### HOW IT WORKS
 
 A web hit request comes in. The following steps take place:
@@ -86,6 +82,7 @@ will most likely still take you offline.
 ## CHANGES OVER STOCK
 Apache 2.4 and 2.0 modules are consolidated to 1 module, mod_evasive. Prior 
 to this change modules were referenced as mod_evasive20 and mod_evasive24. 
+
 Second, the activation threshold has changed from a cooldown rate to absolute
 frequency. In the original mod_evasive release, DOS[Page,Site]Interval set the expiry
 rate between requests. So long as another request happened before DOS[Page,Site]Interval

@@ -13,8 +13,8 @@
 %global rundir /run
 
 Name:		mod_evasive
-Version:	2.1
-Release:	4%{?dist}
+Version:	2.2
+Release:	1%{?dist}
 Summary:	Realtime blacklist module for Apache 2
 Group:		System Environment/Daemons
 License:	GPL 2.0
@@ -63,6 +63,9 @@ rm -rf %{buildroot}
 %{_httpd_moddir}/*.so
 
 %changelog
+* Mon Dec 16 2019 Matt Saladna <matt@apisnetworks.com> - 2.2-1
+- Canonicalize URIs
+
 * Thu Sep 12 2019 Matt Saladna <matt@apisnetworks.com> - 2.1-4
 - Double same-page sensitivity
 - Default hash table size typo
