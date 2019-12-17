@@ -286,7 +286,7 @@ blacklisted IP.
 #### DOSWhiteList
 **Context:** server config
 
-IP addresses of trusted clients can be whitelisted to insure they are never
+IP addresses of trusted clients can be whitelisted to ensure they are never
 denied.  The purpose of whitelisting is to protect software, scripts, local
 searchbots, or other automated tools from being denied for requesting large
 amounts of data from the server.  Whitelisting should *not* be used to add
@@ -312,6 +312,13 @@ DOSWhitelist commands may be used in the configuration.
 
 HTTP status code to send with blocked requests. Defaults to `403` (Forbidden).
 `429` is a more friendly value (Too Many Requests).
+
+#### DOSCanonicalize
+**Context:** server config, virtualhost, directory
+
+Trim query string from URI. When `DOSCanonicalize on`, /foo?bar and /foo are
+interpreted as /foo. When `DOSCanonicalize off`, both are distinct queries.
+Disable this feature for sites that do not use a dispatcher to rewrite URIs.
 
 ## TWEAKING APACHE
 

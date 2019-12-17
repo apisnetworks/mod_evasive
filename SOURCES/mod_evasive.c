@@ -150,6 +150,7 @@ typedef struct {
 	char *log_dir;
 	char *system_command;
 	int http_reply;
+    int canonicalize;
 } evasive_config;
 
 static const char *whitelist(cmd_parms *cmd, void *dconfig, const char *ip);
@@ -177,6 +178,7 @@ static void * create_dir_conf(apr_pool_t *p, char *context)
 		cfg->email_notify = NULL;
 		cfg->log_dir = NULL;
 		cfg->system_command = NULL;
+		cfg->canonicalize = 1;
 		cfg->http_reply = DEFAULT_HTTP_REPLY;
 	}
 
@@ -221,9 +223,11 @@ static int access_checker(request_rec *r)
 
 		/* Not on hold, check hit stats */
 		} else {
+            const char* uri = cfg->canonicalize ? strtok_evasive(r->uri, "?", &last) : r->uri;
 
 			/* Has URI been hit too much? */
-			snprintf(hash_key, 2048, "%s_%s", r->useragent_ip, strtok_evasive(r->uri, "?", &last));
+			snprintf(hash_key, 2048, "%s_%s", r->useragent_ip, uri);
+
 			n = ntt_find(hit_list, hash_key);
 			if (n != NULL) {
 
@@ -752,6 +756,13 @@ get_http_reply(cmd_parms *cmd, void *dconfig, const char *value) {
     return NULL;
 }
 
+static const char*
+get_canonicalize(cmd_parms *cmd, void *dconfig, const char *value) {
+    evasive_config *cfg = (evasive_config *) dconfig;
+    cfg->canonicalize = (!strcmp("off", value)  || !strcmp("false", value)) ? 0 : 1;
+    return NULL;
+}
+
 /* END Configuration Functions */
 
 static const command_rec access_cmds[] =
@@ -790,6 +801,9 @@ static const command_rec access_cmds[] =
         "IP-addresses wildcards to whitelist"),
 
     AP_INIT_ITERATE("DOSHTTPStatus", get_http_reply, NULL, ACCESS_CONF|RSRC_CONF,
+        "HTTP reply code"),
+
+    AP_INIT_ITERATE("DOSCanonicalize", get_http_reply, NULL, ACCESS_CONF|RSRC_CONF,
         "HTTP reply code"),
 
     { NULL }
