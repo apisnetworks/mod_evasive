@@ -101,7 +101,7 @@ static struct ntt_node *c_ntt_next(struct ntt *ntt, struct ntt_c *c);
 /* END NTT (Named Timestamp Tree) Headers */
 
 /* Adopted from apr */
-inline char *strtok_evasive(char *str, const char *sep, char **last)
+static inline char *strtok_evasive(char *str, const char *sep, char **last)
 {
     char *token;
 
@@ -828,7 +828,7 @@ static const command_rec access_cmds[] = {
                     "HTTP reply code"),
 
     AP_INIT_ITERATE("DOSCanonicalize", get_http_reply, NULL, ACCESS_CONF | RSRC_CONF,
-                    "HTTP reply code"),
+                    "Strip query string from request"),
 
     { NULL }
 };
