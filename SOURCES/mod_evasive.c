@@ -827,7 +827,7 @@ static const command_rec access_cmds[] = {
     AP_INIT_ITERATE("DOSHTTPStatus", get_http_reply, NULL, ACCESS_CONF | RSRC_CONF,
                     "HTTP reply code"),
 
-    AP_INIT_ITERATE("DOSCanonicalize", get_http_reply, NULL, ACCESS_CONF | RSRC_CONF,
+    AP_INIT_ITERATE("DOSCanonicalize", get_canonicalize, NULL, ACCESS_CONF | RSRC_CONF,
                     "Strip query string from request"),
 
     { NULL }
