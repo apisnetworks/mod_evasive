@@ -61,6 +61,7 @@ module AP_MODULE_DECLARE_DATA evasive_module;
 #define DEFAULT_BLOCKING_PERIOD 10      // Default for Detected IPs; blocked for 10 seconds
 #define DEFAULT_LOG_DIR		"/tmp"        // Default temp directory
 #define DEFAULT_HTTP_REPLY      HTTP_FORBIDDEN // Default HTTP Reply code (403)
+#define DEFAULT_HTTP_COST       0       // HTTP response cost
 
 /* END DoS Evasive Maneuvers Definitions */
 
@@ -87,6 +88,11 @@ struct ntt_node {
 struct ntt_c {
     long iter_index;
     struct ntt_node *iter_next;
+};
+
+/* http response cost tables */
+struct http_status_cost {
+    int status;
 };
 
 static struct ntt *ntt_create(unsigned long size);
@@ -151,6 +157,7 @@ typedef struct {
     char *system_command;
     int http_reply;
     int canonicalize;
+    struct *response_cost;
 } evasive_config;
 
 static const char *whitelist(cmd_parms *cmd, void *dconfig, const char *ip);
@@ -653,7 +660,7 @@ static const char *
 get_enabled(cmd_parms *cmd, void *dconfig, const char *value)
 {
     evasive_config *cfg = (evasive_config *) dconfig;
-    cfg->enabled = (!strcmp("off", value)  || !strcmp("false", value)) ? 0 : 1;
+    cfg->enabled = (!stricmp("off", value)  || !stricmp("false", value)) ? 0 : 1;
     return NULL;
 }
 
@@ -784,7 +791,7 @@ static const char *
 get_canonicalize(cmd_parms *cmd, void *dconfig, const char *value)
 {
     evasive_config *cfg = (evasive_config *) dconfig;
-    cfg->canonicalize = (!strcmp("off", value)  || !strcmp("false", value)) ? 0 : 1;
+    cfg->canonicalize = (!stricmp("off", value)  || !stricmp("false", value)) ? 0 : 1;
     return NULL;
 }
 
@@ -830,6 +837,9 @@ static const command_rec access_cmds[] = {
     AP_INIT_ITERATE("DOSCanonicalize", get_canonicalize, NULL, ACCESS_CONF | RSRC_CONF,
                     "Strip query string from request"),
 
+    AP_INIT_ITERATE("DOSResponseCost", get_http_cost, NULL, ACCESS_CONF | RSRC_CONF,
+                    "Modify request cost on HTTP status"),
+
     { NULL }
 };
 
@@ -837,6 +847,7 @@ static void register_hooks(apr_pool_t *p)
 {
     create_hit_list();
     ap_hook_access_checker(access_checker, NULL, NULL, APR_HOOK_MIDDLE);
+    ap_hook_post_read_request(augment_http_cost, NULL, NULL, APR_HOOK_REALLY_FIRST - 5);
     apr_pool_cleanup_register(p, NULL, apr_pool_cleanup_null, destroy_config);
 }
 
