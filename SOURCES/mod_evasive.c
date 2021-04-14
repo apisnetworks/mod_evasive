@@ -38,6 +38,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "http_config.h"
 #include "http_log.h"
 #include "http_request.h"
+#include "apr-1/apr_strings.h"
 
 module AP_MODULE_DECLARE_DATA evasive_module;
 
@@ -157,7 +158,6 @@ typedef struct {
     char *system_command;
     int http_reply;
     int canonicalize;
-    struct *response_cost;
 } evasive_config;
 
 static const char *whitelist(cmd_parms *cmd, void *dconfig, const char *ip);
@@ -291,7 +291,8 @@ static int access_checker(request_rec *r)
             apr_table_setn(r->err_headers_out, "Cache-Control", "no-cache");
 
             snprintf(filename, sizeof(filename), "%s/dos-%s", cfg->log_dir != NULL ? cfg->log_dir : DEFAULT_LOG_DIR, r->useragent_ip);
-            if (stat(filename, &s)) {
+            /* Hold back file creation on high frequency attacks */
+            if (stat(filename, &s) || (t - s.st_mtim.tv_sec) >= DEFAULT_BLOCKING_PERIOD) {
                 file = fopen(filename, "w");
                 if (file != NULL) {
                     fprintf(file, "%d\n", getpid());
@@ -660,7 +661,7 @@ static const char *
 get_enabled(cmd_parms *cmd, void *dconfig, const char *value)
 {
     evasive_config *cfg = (evasive_config *) dconfig;
-    cfg->enabled = (!stricmp("off", value)  || !stricmp("false", value)) ? 0 : 1;
+    cfg->enabled = (!apr_strnatcasecmp("off", value)  || !apr_strnatcasecmp("false", value)) ? 0 : 1;
     return NULL;
 }
 
@@ -791,7 +792,7 @@ static const char *
 get_canonicalize(cmd_parms *cmd, void *dconfig, const char *value)
 {
     evasive_config *cfg = (evasive_config *) dconfig;
-    cfg->canonicalize = (!stricmp("off", value)  || !stricmp("false", value)) ? 0 : 1;
+    cfg->canonicalize = (!apr_strnatcasecmp("off", value)  || !apr_strnatcasecmp("false", value)) ? 0 : 1;
     return NULL;
 }
 
@@ -836,10 +837,6 @@ static const command_rec access_cmds[] = {
 
     AP_INIT_ITERATE("DOSCanonicalize", get_canonicalize, NULL, ACCESS_CONF | RSRC_CONF,
                     "Strip query string from request"),
-
-    AP_INIT_ITERATE("DOSResponseCost", get_http_cost, NULL, ACCESS_CONF | RSRC_CONF,
-                    "Modify request cost on HTTP status"),
-
     { NULL }
 };
 
@@ -847,7 +844,6 @@ static void register_hooks(apr_pool_t *p)
 {
     create_hit_list();
     ap_hook_access_checker(access_checker, NULL, NULL, APR_HOOK_MIDDLE);
-    ap_hook_post_read_request(augment_http_cost, NULL, NULL, APR_HOOK_REALLY_FIRST - 5);
     apr_pool_cleanup_register(p, NULL, apr_pool_cleanup_null, destroy_config);
 }
 

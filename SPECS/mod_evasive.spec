@@ -13,7 +13,7 @@
 %global rundir /run
 
 Name:		mod_evasive
-Version:	2.2
+Version:	2.3
 Release:	1%{?dist}
 Summary:	Realtime blacklist module for Apache 2
 Group:		System Environment/Daemons
@@ -63,6 +63,9 @@ rm -rf %{buildroot}
 %{_httpd_moddir}/*.so
 
 %changelog
+* Thu Apr 15 2021 Matt Saladna <matt@apisnetworks.com> - 2.3-1
+- Recycle mod_evasive logging for persistent bots
+
 * Mon Dec 16 2019 Matt Saladna <matt@apisnetworks.com> - 2.2-1
 - Canonicalize URIs
 
