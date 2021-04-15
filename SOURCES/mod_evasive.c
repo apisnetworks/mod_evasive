@@ -292,7 +292,7 @@ static int access_checker(request_rec *r)
 
             snprintf(filename, sizeof(filename), "%s/dos-%s", cfg->log_dir != NULL ? cfg->log_dir : DEFAULT_LOG_DIR, r->useragent_ip);
             /* Hold back file creation on high frequency attacks */
-            if (stat(filename, &s) || (t - s.st_mtim.tv_sec) >= DEFAULT_BLOCKING_PERIOD) {
+            if (stat(filename, &s) || (s.st_mtim.tv_sec - t) >= DEFAULT_BLOCKING_PERIOD) {
                 file = fopen(filename, "w");
                 if (file != NULL) {
                     fprintf(file, "%d\n", getpid());
